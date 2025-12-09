@@ -5,17 +5,6 @@ SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 600
 LEVEL_WIDTH = 4000
 LEVEL_HEIGHT = 800
-FPS = 60
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 50, 50)
-GREEN = (50, 255, 50)
-BLUE = (50, 100, 255)
-YELLOW = (255, 255, 0)
-PURPLE = (180, 70, 200)
-GRAY = (100, 100, 100)
-BROWN = (139, 69, 19)
-LIGHT_BLUE = (100, 200, 255)
 
 
 class Player(pygame.sprite.Sprite):
@@ -62,11 +51,11 @@ class Player(pygame.sprite.Sprite):
         """
         super().__init__()
         try:
-            self.original_image = pygame.image.load('hero.png').convert_alpha()
+            self.original_image = pygame.image.load('pictures/hero.png').convert_alpha()
             self.image = pygame.transform.scale(self.original_image, (50, 70))
         except FileNotFoundError:
             self.image = pygame.Surface((50, 70))
-            self.image.fill(BLUE)
+            self.image.fill((50, 100, 255))
             self.original_image = self.image.copy()
 
         self.rect = self.image.get_rect()
@@ -189,7 +178,7 @@ class Player(pygame.sprite.Sprite):
         if self.immune:
             self.image = self.original_image.copy()
             blue_filter = pygame.Surface(self.image.get_size())
-            blue_filter.fill(RED)
+            blue_filter.fill((255, 50, 50))
             self.image.blit(blue_filter, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
             self.image = pygame.transform.scale(self.image, (50, 70))
         else:
@@ -221,11 +210,11 @@ class Platform(pygame.sprite.Sprite):
         """
         super().__init__()
         try:
-            self.image = pygame.image.load('platform.png').convert()
+            self.image = pygame.image.load('pictures/platform.png').convert()
             self.image = pygame.transform.scale(self.image, (width, height))
         except FileNotFoundError:
             self.image = pygame.Surface((width, height))
-            self.image.fill(BROWN)
+            self.image.fill((139, 69, 19))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -235,11 +224,11 @@ class VerticalPlatform(Platform):
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width, height)
         try:
-            self.image = pygame.image.load('vertical_platform.png').convert()
+            self.image = pygame.image.load('pictures/vertical_platform.png').convert()
             self.image = pygame.transform.scale(self.image, (width, height))
         except FileNotFoundError:
             self.image = pygame.Surface((width, height))
-            self.image.fill(BROWN)
+            self.image.fill((139, 69, 19))
 
 
 class Spike(pygame.sprite.Sprite):
@@ -266,11 +255,11 @@ class Spike(pygame.sprite.Sprite):
         """
         super().__init__()
         try:
-            self.original_image = pygame.image.load('spike.png').convert_alpha()
+            self.original_image = pygame.image.load('pictures/spike.png').convert_alpha()
             self.image = pygame.transform.scale(self.original_image, (width, height))
         except FileNotFoundError:
             self.image = pygame.Surface((width, height), pygame.SRCALPHA)
-            pygame.draw.polygon(self.image, RED, [(width // 2, 0), (0, height), (width, height)])
+            pygame.draw.polygon(self.image, (255, 50, 50), [(width // 2, 0), (0, height), (width, height)])
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -310,13 +299,13 @@ class Turret(pygame.sprite.Sprite):
         """
         super().__init__()
         try:
-            self.image = pygame.transform.scale(pygame.image.load('turret.png').convert_alpha(), (70, 60))
+            self.image = pygame.transform.scale(pygame.image.load('pictures/turret.png').convert_alpha(), (70, 60))
             self.base_image = self.image.copy()
             if direction == "right":
                 self.base_image = pygame.transform.flip(self.base_image, True, False)
         except FileNotFoundError:
             self.base_image = pygame.Surface((70, 60), pygame.SRCALPHA)
-            self.base_image.fill(GREEN)
+            self.base_image.fill((50, 255, 50))
             self.image = self.base_image.copy()
 
         self.rect = self.image.get_rect()
@@ -366,7 +355,7 @@ class Turret(pygame.sprite.Sprite):
         self.shoot_animation_time = pygame.time.get_ticks()
 
         flash = pygame.Surface((10, 10), pygame.SRCALPHA)
-        pygame.draw.circle(flash, YELLOW, (5, 5), 5)
+        pygame.draw.circle(flash, (50, 100, 255), (5, 5), 5)
         pygame.draw.circle(flash, (255, 200, 50, 150), (5, 5), 3)
 
         if self.direction == "right":
@@ -403,13 +392,13 @@ class Bullet(pygame.sprite.Sprite):
         """
         super().__init__()
         try:
-            self.image = pygame.image.load('bullet.png').convert_alpha()
+            self.image = pygame.image.load('pictures/bullet.png').convert_alpha()
             self.image = pygame.transform.scale(self.image, (15, 15))
             if vel_x > 0:
                 self.image = pygame.transform.flip(self.image, True, False)
         except FileNotFoundError:
             self.image = pygame.Surface((10, 10))
-            self.image.fill(RED)
+            self.image.fill((255, 50, 50))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.vel_x = vel_x
@@ -481,9 +470,9 @@ class Collectible(pygame.sprite.Sprite):
         self.type = type
 
         image_files = {
-            "life": "heart.png",
-            "speed": "speed.png",
-            "immune": "immune.png"
+            "life": "pictures/heart.png",
+            "speed": "pictures/speed.png",
+            "immune": "pictures/immune.png"
         }
 
         try:
@@ -494,16 +483,16 @@ class Collectible(pygame.sprite.Sprite):
         except FileNotFoundError:
             self.image = pygame.Surface((20, 20), pygame.SRCALPHA)
             if type == "life":
-                pygame.draw.polygon(self.image, RED,
+                pygame.draw.polygon(self.image, (255, 50, 50),
                                     [(10, 3), (13, 6), (16, 3),
                                      (10, 12), (4, 3), (7, 6)])
             elif type == "speed":
-                pygame.draw.polygon(self.image, YELLOW,
+                pygame.draw.polygon(self.image, (50, 100, 255),
                                     [(10, 3), (13, 10), (10, 10),
                                      (13, 17), (10, 17), (7, 10), (10, 10)])
             elif type == "immune":
-                pygame.draw.circle(self.image, GREEN, (10, 10), 8, 2)
-                pygame.draw.circle(self.image, GREEN, (10, 10), 5, 2)
+                pygame.draw.circle(self.image, (50, 255, 50), (10, 10), 8, 2)
+                pygame.draw.circle(self.image, (50, 255, 50), (10, 10), 5, 2)
 
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -547,13 +536,13 @@ class Checkpoint(pygame.sprite.Sprite):
         """
         super().__init__()
         try:
-            self.image = pygame.image.load('finish.png').convert_alpha()
+            self.image = pygame.image.load('pictures/finish.png').convert_alpha()
             self.image = pygame.transform.scale(self.image, (60, 80))
         except FileNotFoundError:
             self.image = pygame.Surface((40, 60))
-            self.image.fill(GREEN)
-            pygame.draw.rect(self.image, WHITE, (15, 10, 10, 30))
-            pygame.draw.polygon(self.image, RED, [(25, 10), (35, 15), (25, 20)])
+            self.image.fill((50, 255, 50))
+            pygame.draw.rect(self.image, (255, 255, 255), (15, 10, 10, 30))
+            pygame.draw.polygon(self.image, (255, 50, 50), [(25, 10), (35, 15), (25, 20)])
 
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -670,7 +659,7 @@ def main():
     pygame.display.set_caption("Platformer")
     clock = pygame.time.Clock()
     try:
-        bg_tile = pygame.image.load('background.png').convert()
+        bg_tile = pygame.image.load('pictures/background.png').convert()
         tile_width, tile_height = bg_tile.get_size()
         bg_image = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         for x in range(0, SCREEN_WIDTH, tile_width):
@@ -679,7 +668,7 @@ def main():
 
     except FileNotFoundError:
         bg_image = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-        bg_image.fill(GRAY)
+        bg_image.fill((100, 100, 100))
     platforms, spikes, turrets, collectibles, checkpoint = create_level()
     player = Player(100, 100)
     camera_x = 0
@@ -735,23 +724,24 @@ def main():
             screen.blit(collectible.image, (collectible.rect.x - camera_x, collectible.rect.y - camera_y))
         screen.blit(checkpoint.image, (checkpoint.rect.x - camera_x, checkpoint.rect.y - camera_y))
         screen.blit(player.image, (player.rect.x - camera_x, player.rect.y - camera_y))
-        lives_text = font.render(f"Жизни: {player.lives}", True, WHITE)
+        lives_text = font.render(f"Жизни: {player.lives}", True, (255, 255, 255))
         screen.blit(lives_text, (10, 10))
-        score_text = font.render(f"Счёт: {player.score}", True, WHITE)
+        score_text = font.render(f"Счёт: {player.score}", True, (255, 255, 255))
         screen.blit(score_text, (10, 50))
 
-        controls_text = small_font.render("Управление: <- ->/A D - движение, W/Пробел - прыжок", True, WHITE)
+        controls_text = small_font.render("Управление: <- ->/A D - движение, W/Пробел - прыжок", True, (255, 255, 255))
         screen.blit(controls_text, (SCREEN_WIDTH - controls_text.get_width() - 10, 10))
         if game_won:
-            win_text = font.render("УРОВЕНЬ ПРОЙДЕН! Нажмите R для перезапуска", True, GREEN)
+            win_text = font.render("УРОВЕНЬ ПРОЙДЕН! Нажмите R для перезапуска", True, (50, 255, 50))
             screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
         if game_over:
-            lose_text = font.render("ВЫ ПРОИГРАЛИ! Нажмите R для перезапуска", True, RED)
+            lose_text = font.render("ВЫ ПРОИГРАЛИ! Нажмите R для перезапуска", True, (255, 50, 50))
             screen.blit(lose_text, (SCREEN_WIDTH // 2 - lose_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
         pygame.display.flip()
-        clock.tick(FPS)
+        clock.tick(60)
     pygame.quit()
     sys.exit()
+
 
 if __name__ == "__main__":
     main()
