@@ -1,6 +1,4 @@
 import pygame
-import sys
-
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 600
 LEVEL_WIDTH = 4000
@@ -120,11 +118,11 @@ class Player(pygame.sprite.Sprite):
         self.on_ground = False
         for platform in platforms:
             if self.rect.colliderect(platform.rect):
-                if self.vel_y > 0:  # Падение вниз
+                if self.vel_y > 0:
                     self.rect.bottom = platform.rect.top
                     self.on_ground = True
                     self.vel_y = 0
-                elif self.vel_y < 0:  # Движение вверх
+                elif self.vel_y < 0:
                     self.rect.top = platform.rect.bottom
                     self.vel_y = 0
         if self.rect.left < 0:
@@ -149,8 +147,7 @@ class Player(pygame.sprite.Sprite):
                 if self.rect.colliderect(spike.rect):
                     self.lives -= 1
                     self.immune = True
-                    self.immune_time = current_time + 1000  # Иммунитет на 1 секунду
-                    # Отталкивание от шипов
+                    self.immune_time = current_time + 1000
                     self.vel_y = -10
                     break
 
@@ -162,12 +159,6 @@ class Player(pygame.sprite.Sprite):
                         self.immune = True
                         self.immune_time = current_time + 1000
                         turret.bullets.remove(bullet)
-                        if bullet.vel_x > 0:
-                            self.vel_x = -10
-                        else:
-                            self.vel_x = 10
-                        self.vel_y = -5
-                        break
 
         for collectible in collectibles:
             if self.rect.colliderect(collectible.rect):
@@ -178,7 +169,7 @@ class Player(pygame.sprite.Sprite):
         if self.immune:
             self.image = self.original_image.copy()
             blue_filter = pygame.Surface(self.image.get_size())
-            blue_filter.fill((255, 50, 50))
+            blue_filter.fill((100, 200, 255))
             self.image.blit(blue_filter, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
             self.image = pygame.transform.scale(self.image, (50, 70))
         else:
@@ -280,10 +271,6 @@ class Turret(pygame.sprite.Sprite):
     :type last_shot: int
     :ivar shoot_delay: Задержка между выстрелами в миллисекундах
     :type shoot_delay: int
-    :ivar shooting: Флаг активной стрельбы
-    :type shooting: bool
-    :ivar shoot_animation_time: Время начала анимации стрельбы
-    :type shoot_animation_time: int
     """
 
     def __init__(self, x, y, direction="right"):
@@ -316,8 +303,6 @@ class Turret(pygame.sprite.Sprite):
         self.bullets = []
         self.last_shot = 0
         self.shoot_delay = 2000
-        self.shooting = False
-        self.shoot_animation_time = 0
 
     def update(self, player, platforms=None):
         """
@@ -329,15 +314,11 @@ class Turret(pygame.sprite.Sprite):
         :type platforms: list
         """
         current_time = pygame.time.get_ticks()
-        if self.shooting and current_time - self.shoot_animation_time > 100:
-            self.shooting = False
-            self.image = self.base_image.copy()
         if current_time - self.last_shot > self.shoot_delay:
             self.shoot()
             self.last_shot = current_time
 
-        # Обновление пуль
-        for bullet in self.bullets[:]:  # Используем копию для безопасного удаления
+        for bullet in self.bullets[:]:
             collided = bullet.update(platforms)
             if collided:
                 self.bullets.remove(bullet)
@@ -351,17 +332,6 @@ class Turret(pygame.sprite.Sprite):
         else:
             bullet = Bullet(self.rect.left, self.rect.centery, -5, 0)
         self.bullets.append(bullet)
-        self.shooting = True
-        self.shoot_animation_time = pygame.time.get_ticks()
-
-        flash = pygame.Surface((10, 10), pygame.SRCALPHA)
-        pygame.draw.circle(flash, (50, 100, 255), (5, 5), 5)
-        pygame.draw.circle(flash, (255, 200, 50, 150), (5, 5), 3)
-
-        if self.direction == "right":
-            self.image.blit(flash, (65, 27))
-        else:
-            self.image.blit(flash, (-5, 27))
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -419,27 +389,14 @@ class Bullet(pygame.sprite.Sprite):
         if platforms:
             for platform in platforms:
                 if self.rect.colliderect(platform.rect):
-                    self.rect = old_rect
-                    self.rect.x += self.vel_x
-                    if self.rect.colliderect(platform.rect):
-                        self.rect.x = old_rect.x
-                        if self.vel_x > 0:
-                            self.rect.right = platform.rect.left
-                        else:
-                            self.rect.left = platform.rect.right
-                        return True
-                    self.rect = old_rect
-                    self.rect.y += self.vel_y
-                    if self.rect.colliderect(platform.rect):
-                        self.rect.y = old_rect.y
-                        if self.vel_y > 0:
-                            self.rect.bottom = platform.rect.top
-                        else:
-                            self.rect.top = platform.rect.bottom
-                        return True
+                    self.rect.x = old_rect.x
+                    if self.vel_x > 0:
+                        self.rect.right = platform.rect.left
+                    else:
+                        self.rect.left = platform.rect.right
+                    return True
 
-        if (self.rect.right < -50 or self.rect.left > LEVEL_WIDTH + 50 or
-                self.rect.bottom < -50 or self.rect.top > LEVEL_HEIGHT + 50):
+        if self.rect.right < -50 or self.rect.left > LEVEL_WIDTH + 50:
             return True
 
         return False
@@ -483,17 +440,11 @@ class Collectible(pygame.sprite.Sprite):
         except FileNotFoundError:
             self.image = pygame.Surface((20, 20), pygame.SRCALPHA)
             if type == "life":
-                pygame.draw.polygon(self.image, (255, 50, 50),
-                                    [(10, 3), (13, 6), (16, 3),
-                                     (10, 12), (4, 3), (7, 6)])
+                self.image.fill((255, 50, 50))
             elif type == "speed":
-                pygame.draw.polygon(self.image, (50, 100, 255),
-                                    [(10, 3), (13, 10), (10, 10),
-                                     (13, 17), (10, 17), (7, 10), (10, 10)])
+                self.image.fill((255, 255, 0))
             elif type == "immune":
-                pygame.draw.circle(self.image, (50, 255, 50), (10, 10), 8, 2)
-                pygame.draw.circle(self.image, (50, 255, 50), (10, 10), 5, 2)
-
+                self.image.fill((120, 120, 120))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -509,10 +460,10 @@ class Collectible(pygame.sprite.Sprite):
             player.lives += 1
         elif self.type == "speed":
             player.speed_boost = 3
-            player.speed_boost_time = pygame.time.get_ticks() + 5000  # 5 секунд
+            player.speed_boost_time = pygame.time.get_ticks() + 5000
         elif self.type == "immune":
             player.immune = True
-            player.immune_time = pygame.time.get_ticks() + 3000  # 3 секунды
+            player.immune_time = pygame.time.get_ticks() + 3000
 
 
 class Checkpoint(pygame.sprite.Sprite):
@@ -541,9 +492,6 @@ class Checkpoint(pygame.sprite.Sprite):
         except FileNotFoundError:
             self.image = pygame.Surface((40, 60))
             self.image.fill((50, 255, 50))
-            pygame.draw.rect(self.image, (255, 255, 255), (15, 10, 10, 30))
-            pygame.draw.polygon(self.image, (255, 50, 50), [(25, 10), (35, 15), (25, 20)])
-
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -728,7 +676,6 @@ def main():
         screen.blit(lives_text, (10, 10))
         score_text = font.render(f"Счёт: {player.score}", True, (255, 255, 255))
         screen.blit(score_text, (10, 50))
-
         controls_text = small_font.render("Управление: <- ->/A D - движение, W/Пробел - прыжок", True, (255, 255, 255))
         screen.blit(controls_text, (SCREEN_WIDTH - controls_text.get_width() - 10, 10))
         if game_won:
@@ -740,7 +687,6 @@ def main():
         pygame.display.flip()
         clock.tick(60)
     pygame.quit()
-    sys.exit()
 
 
 if __name__ == "__main__":
